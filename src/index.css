@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+    direction: rtl;
+    text-align: right;
+    background-color: #f8faf7;
+    color: #1c2e24;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom Scout Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f2;
+}
+::-webkit-scrollbar-thumb {
+  background: #107c41;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0b592e;
+}
+
+/* Print styles for official scouting technical note */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}

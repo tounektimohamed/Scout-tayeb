@@ -1,0 +1,156 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isTroopLeader() {
+      return isSignedIn() && (
+        request.auth.token.email == 'tounekti17@gmail.com' ||
+        request.auth.token.email == 'codeopen540@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'troop_leader')
+      );
+    }
+
+    function isLeaderOfSection(secId) {
+      return isSignedIn() && (
+        isTroopLeader() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'section_leader' &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.sectionId == secId)
+      );
+    }
+
+    // --- 1. Users collection ---
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isTroopLeader());
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (
+        isTroopLeader() ||
+        (request.auth.uid == userId && incoming().role == existing().role)
+      );
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 1.1 Assigned Leaders by Email (Troop Leader sole authority) ---
+    match /assigned_leaders/{email} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTroopLeader();
+    }
+
+    // --- 2. Scout Members ---
+    match /members/{memberId} {
+      allow get: if isSignedIn() && (
+        isTroopLeader() ||
+        existing().parentId == request.auth.uid ||
+        isLeaderOfSection(existing().sectionId)
+      );
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && (
+        isTroopLeader() ||
+        (incoming().parentId == request.auth.uid && incoming().status == 'pending')
+      );
+      allow update: if isSignedIn() && (
+        isTroopLeader() ||
+        (existing().parentId == request.auth.uid && incoming().status == existing().status) ||
+        (isLeaderOfSection(existing().sectionId) && incoming().parentId == existing().parentId)
+      );
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 3. Technical Notes ---
+    match /technical_notes/{noteId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && (
+        isTroopLeader() ||
+        isLeaderOfSection(incoming().sectionId)
+      );
+      allow update: if isSignedIn() && (
+        isTroopLeader() ||
+        (
+          isLeaderOfSection(existing().sectionId) &&
+          existing().status != 'approved' &&
+          incoming().status != 'approved'
+        )
+      );
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 4. Monthly Programs ---
+    match /monthly_programs/{programId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && (
+        isTroopLeader() ||
+        isLeaderOfSection(incoming().sectionId)
+      );
+      allow update: if isSignedIn() && (
+        isTroopLeader() ||
+        isLeaderOfSection(existing().sectionId)
+      );
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 5. Activity Outputs ---
+    match /activity_outputs/{outputId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isLeaderOfSection(incoming().sectionId);
+      allow update: if isSignedIn() && isLeaderOfSection(existing().sectionId);
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 6. Subscriptions ---
+    match /subscriptions/{subId} {
+      allow get, list: if isSignedIn();
+      allow create: if isTroopLeader() || (isSignedIn() && isLeaderOfSection(incoming().sectionId));
+      allow update: if isTroopLeader() || (isSignedIn() && isLeaderOfSection(existing().sectionId));
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 7. Announcements ---
+    match /announcements/{announcementId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isTroopLeader();
+    }
+
+    // --- 8. Messages ---
+    match /messages/{messageId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && incoming().senderId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        isTroopLeader() ||
+        (existing().recipientType == 'section_leader' && isLeaderOfSection(existing().sectionId)) ||
+        existing().senderId == request.auth.uid
+      );
+      allow delete: if isTroopLeader();
+    }
+
+    // --- 9. Audit Logs ---
+    match /audit_logs/{logId} {
+      allow read: if isTroopLeader();
+      allow create: if isSignedIn();
+      allow update, delete: if false; // Append-only immutable log
+    }
+  }
+}

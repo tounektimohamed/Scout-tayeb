@@ -1,0 +1,227 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role, contact info and assigned section",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "role": { "type": "string", "enum": ["parent", "section_leader", "troop_leader"] },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "name", "role"]
+    },
+    "ScoutMember": {
+      "title": "ScoutMember",
+      "description": "Scout youth member registered by parent",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "parentId": { "type": "string" },
+        "parentName": { "type": "string", "maxLength": 100 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "birthDate": { "type": "string", "maxLength": 20 },
+        "gender": { "type": "string", "enum": ["male", "female"] },
+        "gradeSchool": { "type": "string", "maxLength": 120 },
+        "address": { "type": "string", "maxLength": 200 },
+        "phone1": { "type": "string", "maxLength": 30 },
+        "phone2": { "type": "string", "maxLength": 30 },
+        "healthNotes": { "type": "string", "maxLength": 500 },
+        "photoUrl": { "type": "string", "maxLength": 500 },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "rejectionReason": { "type": "string", "maxLength": 300 },
+        "badges": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["fullName", "parentId", "birthDate", "gender", "status"]
+    },
+    "TechnicalNote": {
+      "title": "TechnicalNote",
+      "description": "Electronic weekly scout technical pedagogical note",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 200 },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "educationalDomain": { "type": "string", "enum": ["religious", "physical", "intellectual", "social", "emotional", "scout_method"] },
+        "scoutStage": { "type": "string", "enum": ["ashbal", "zaharat", "kashafa", "murshidat", "mutaqaddim", "ruwwad"] },
+        "targetGroup": { "type": "string", "maxLength": 100 },
+        "suggestedCount": { "type": "number" },
+        "actualCount": { "type": "number" },
+        "date": { "type": "string", "maxLength": 20 },
+        "startTime": { "type": "string", "maxLength": 10 },
+        "location": { "type": "string", "maxLength": 150 },
+        "durationMinutes": { "type": "number" },
+        "generalObjective": { "type": "string", "maxLength": 400 },
+        "specificObjectives": { "type": "array" },
+        "materials": { "type": "array" },
+        "stages": { "type": "array" },
+        "successIndicators": { "type": "string", "maxLength": 500 },
+        "badges": { "type": "array" },
+        "leaderId": { "type": "string" },
+        "leaderName": { "type": "string", "maxLength": 100 },
+        "leaderSignature": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "submitted", "approved", "change_requested", "rejected"] },
+        "leaderFeedback": { "type": "string", "maxLength": 500 },
+        "feedbackField": { "type": "string", "maxLength": 100 },
+        "approvedAt": { "type": "string" },
+        "approvedBy": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "sectionId", "status", "leaderId"]
+    },
+    "MonthlyProgram": {
+      "title": "MonthlyProgram",
+      "description": "Monthly scout program for section activities",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "month": { "type": "number" },
+        "year": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "submitted", "approved", "change_requested", "rejected"] },
+        "activities": { "type": "array" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["sectionId", "month", "year", "status"]
+    },
+    "ActivityOutput": {
+      "title": "ActivityOutput",
+      "description": "Output report, photos and attendance of a completed activity",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "technicalNoteId": { "type": "string" },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "title": { "type": "string", "maxLength": 200 },
+        "date": { "type": "string", "maxLength": 20 },
+        "summary": { "type": "string", "maxLength": 1000 },
+        "photos": { "type": "array" },
+        "attendees": { "type": "array" },
+        "awardedBadges": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["sectionId", "title", "summary"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "Scout member periodic subscription tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string", "maxLength": 100 },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "parentId": { "type": "string" },
+        "seasonYear": { "type": "string", "maxLength": 20 },
+        "month": { "type": "string", "maxLength": 30 },
+        "amount": { "type": "number" },
+        "isPaid": { "type": "boolean" },
+        "paidAt": { "type": "string" },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["memberId", "sectionId", "amount", "isPaid"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "General or section-specific announcement / news",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 200 },
+        "content": { "type": "string", "maxLength": 1500 },
+        "targetSection": { "type": "string", "maxLength": 50 },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "priority": { "type": "string", "enum": ["normal", "urgent"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "content", "targetSection"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Direct communication between parents and section/troop leaders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderRole": { "type": "string", "enum": ["parent", "section_leader", "troop_leader"] },
+        "recipientType": { "type": "string", "enum": ["section_leader", "troop_leader"] },
+        "sectionId": { "type": "string", "maxLength": 50 },
+        "subject": { "type": "string", "maxLength": 150 },
+        "content": { "type": "string", "maxLength": 1000 },
+        "reply": { "type": "string", "maxLength": 1000 },
+        "repliedAt": { "type": "string" },
+        "repliedByName": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["unread", "replied"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["senderId", "senderName", "content", "status"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Action log recording who did what and when",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "action": { "type": "string", "maxLength": 100 },
+        "performedBy": { "type": "string" },
+        "performedByName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "maxLength": 50 },
+        "targetType": { "type": "string", "maxLength": 50 },
+        "targetId": { "type": "string", "maxLength": 100 },
+        "details": { "type": "string", "maxLength": 300 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["action", "performedBy", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "User" },
+      "description": "App users and their role assignments"
+    },
+    "/members/{memberId}": {
+      "schema": { "$ref": "ScoutMember" },
+      "description": "Registered scout members"
+    },
+    "/technical_notes/{noteId}": {
+      "schema": { "$ref": "TechnicalNote" },
+      "description": "Weekly electronic scout technical notes"
+    },
+    "/monthly_programs/{programId}": {
+      "schema": { "$ref": "MonthlyProgram" },
+      "description": "Monthly section scout programs"
+    },
+    "/activity_outputs/{outputId}": {
+      "schema": { "$ref": "ActivityOutput" },
+      "description": "Post-activity output summaries and member attendance"
+    },
+    "/subscriptions/{subId}": {
+      "schema": { "$ref": "Subscription" },
+      "description": "Scout membership subscriptions"
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "Announcement" },
+      "description": "Troop news and section announcements"
+    },
+    "/messages/{messageId}": {
+      "schema": { "$ref": "Message" },
+      "description": "Parent and leader communications"
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "AuditLog" },
+      "description": "Immutable operational audit trails"
+    }
+  }
+}
